@@ -65,6 +65,7 @@ export function isRole(value: unknown): value is UserRole {
 export async function loadUserByRegNumber(regNumber: string) {
   const result = await query<SessionUser>(
     `SELECT u.id AS "userId", u.member_id AS "memberId", m."RegNumber" AS "regNumber",
+            u.phone_number AS "phoneNumber",
             u.email,
             u.role, u.password_hash AS "passwordHash",
             m.firstname, m."LastName" AS lastname, m.image
@@ -72,6 +73,21 @@ export async function loadUserByRegNumber(regNumber: string) {
        JOIN public.members m ON m.id = u.member_id
       WHERE lower(m."RegNumber") = lower($1)`,
     [regNumber.trim()]
+  );
+  return result.rows[0] ?? null;
+}
+
+export async function loadUserByPhone(phoneNumber: string) {
+  const normalized = phoneNumber.replace(/\D/g, "");
+  const result = await query<SessionUser>(
+    `SELECT u.id AS "userId", u.member_id AS "memberId", m."RegNumber" AS "regNumber",
+            u.phone_number AS "phoneNumber", u.email,
+            u.role, u.password_hash AS "passwordHash",
+            m.firstname, m."LastName" AS lastname, m.image
+       FROM public.member_users u
+       JOIN public.members m ON m.id = u.member_id
+      WHERE u.phone_number = $1 AND u.role IN ('CP', 'CEPINE')`,
+    [normalized]
   );
   return result.rows[0] ?? null;
 }

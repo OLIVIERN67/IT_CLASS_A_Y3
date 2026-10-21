@@ -36,6 +36,15 @@ does not create a replacement directory or seed/delete member records.
    server-authorized `role`.
    Remove `SETUP_TOKEN` after provisioning.
 
+   Representative accounts use the separate phone login and are provisioned
+   securely with bcrypt hashes. The current configured accounts are:
+
+   - CP: `0786718716`, password `Y3ITA@2026!`
+   - CEPINE: `0791030409`, password `Y3ITA@2026!`
+
+   Phone numbers are stored in `member_users.phone_number`; plaintext
+   passwords are never stored.
+
 6. Run `npm run dev` and open `http://localhost:3000`.
 
 ## Backend endpoints

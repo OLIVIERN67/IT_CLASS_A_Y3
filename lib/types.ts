@@ -4,6 +4,7 @@ export type SessionUser = {
   userId: number;
   memberId: number;
   regNumber: string;
+  phoneNumber?: string | null;
   email: string;
   role: UserRole;
   firstname: string;

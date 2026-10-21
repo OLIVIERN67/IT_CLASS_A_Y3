@@ -12,6 +12,7 @@ export const memberSchema = z.object({
 });
 
 export const loginSchema = z.object({
-  regNumber: z.string().trim().min(1).max(50),
+  loginType: z.enum(["member", "representative"]).default("member"),
+  identifier: z.string().trim().min(1).max(50),
   password: z.string().min(8).max(128)
 });

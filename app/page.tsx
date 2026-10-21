@@ -16,6 +16,7 @@ export default function Home() {
   const [editing, setEditing] = useState<number | null>(null);
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loginType, setLoginType] = useState<"member" | "representative">("member");
 
   const load = async () => {
     const response = await fetch(`/api/members?search=${encodeURIComponent(search)}&role=${encodeURIComponent(role)}`);
@@ -31,7 +32,8 @@ export default function Home() {
 
   async function login(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const data = Object.fromEntries(new FormData(event.currentTarget));
+    const formData = Object.fromEntries(new FormData(event.currentTarget));
+    const data = { ...formData, loginType };
     const response = await fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
     const result = await response.json();
     if (!response.ok) return setNotice(result.error);
@@ -57,7 +59,7 @@ export default function Home() {
     setForm((current) => ({ ...current, image: result.url })); setNotice("Photo ready to save.");
   }
   if (loading) return <main className="center"><span className="spinner" /> Loading workspace…</main>;
-  if (!user) return <main className="login-shell"><section className="login-card"><div className="brand">CM<span>+</span></div><p className="eyebrow">Y3 IT Class A</p><h1>Welcome back</h1><p className="muted">Sign in with your registration number.</p><form onSubmit={login} className="stack"><label>Registration number<input name="regNumber" autoComplete="username" required /></label><label>Password<input name="password" type="password" autoComplete="current-password" minLength={8} required /></label><button className="primary">Sign in</button>{notice && <p className="error">{notice}</p>}</form></section></main>;
+  if (!user) return <main className="login-shell"><section className="login-card"><div className="brand">CM<span>+</span></div><p className="eyebrow">Y3 IT Class A</p><h1>{loginType === "representative" ? "Representative sign in" : "Member sign in"}</h1><p className="muted">{loginType === "representative" ? "Secure access for CP and CEPINE." : "View the class directory with your registration number."}</p><div className="login-switch" role="tablist"><button type="button" className={loginType === "member" ? "selected" : ""} onClick={() => { setLoginType("member"); setNotice(""); }}>Members</button><button type="button" className={loginType === "representative" ? "selected" : ""} onClick={() => { setLoginType("representative"); setNotice(""); }}>CP / CEPINE</button></div><form onSubmit={login} className="stack"><label>{loginType === "representative" ? "Phone number" : "Registration number"}<input name="identifier" type={loginType === "representative" ? "tel" : "text"} inputMode={loginType === "representative" ? "tel" : "text"} autoComplete="username" placeholder={loginType === "representative" ? "0786718716" : "e.g. 24RP12420"} required /></label><label>Password<input name="password" type="password" autoComplete="current-password" minLength={8} required /></label><button className="primary">{loginType === "representative" ? "Open admin dashboard" : "Sign in"}</button>{notice && <p className="error">{notice}</p>}</form></section></main>;
 
   const admin = user.role === "CP" || user.role === "CEPINE";
   return <main className="app-shell">

@@ -15,11 +15,15 @@ CREATE TABLE IF NOT EXISTS public.member_users (
 );
 
 ALTER TABLE public.member_users
-  ALTER COLUMN email DROP NOT NULL;
+  ALTER COLUMN email DROP NOT NULL,
+  ADD COLUMN IF NOT EXISTS phone_number text;
 
 CREATE INDEX IF NOT EXISTS members_role_idx ON public.members ("Role");
 CREATE INDEX IF NOT EXISTS members_updated_at_idx ON public.members (updated_at DESC);
 CREATE INDEX IF NOT EXISTS member_users_member_id_idx ON public.member_users (member_id);
+CREATE UNIQUE INDEX IF NOT EXISTS member_users_phone_number_idx
+  ON public.member_users (phone_number)
+  WHERE phone_number IS NOT NULL;
 
 CREATE OR REPLACE FUNCTION public.set_member_updated_at()
 RETURNS trigger LANGUAGE plpgsql AS $$
