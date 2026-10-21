@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { Member, SessionUser } from "@/lib/types";
+import { welcomeCards } from "@/lib/welcome-data";
 
 type Stats = { total: number; withPhotos: number; withoutPhotos: number; representatives: number };
 const emptyForm = { regNumber: "", firstname: "", lastname: "", role: "MEMBER", image: null as string | null };
@@ -17,6 +18,7 @@ export default function Home() {
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(true);
   const [loginType, setLoginType] = useState<"member" | "representative">("member");
+  const [showLogin, setShowLogin] = useState(false);
 
   const load = async () => {
     const response = await fetch(`/api/members?search=${encodeURIComponent(search)}&role=${encodeURIComponent(role)}`);
@@ -68,7 +70,8 @@ export default function Home() {
     setForm((current) => ({ ...current, image: result.url })); setNotice("Photo ready to save.");
   }
   if (loading) return <main className="center"><span className="spinner" /> Loading workspace…</main>;
-  if (!user) return <main className="login-shell"><section className="login-card"><div className="brand">CM<span>+</span></div><p className="eyebrow">Y3 IT Class A</p><h1>{loginType === "representative" ? "Representative sign in" : "Member sign in"}</h1><p className="muted">{loginType === "representative" ? "Secure access for CP and CEPINE." : "View the class directory with your registration number."}</p><div className="login-switch" role="tablist"><button type="button" className={loginType === "member" ? "selected" : ""} onClick={() => { setLoginType("member"); setNotice(""); }}>Members</button><button type="button" className={loginType === "representative" ? "selected" : ""} onClick={() => { setLoginType("representative"); setNotice(""); }}>CP / CEPINE</button></div><form onSubmit={login} className="stack"><label>{loginType === "representative" ? "Phone number" : "Registration number"}<input name="identifier" type={loginType === "representative" ? "tel" : "text"} inputMode={loginType === "representative" ? "tel" : "text"} autoComplete="username" placeholder={loginType === "representative" ? "0786718716" : "e.g. 24RP12420"} required /></label><label>Password<input name="password" type="password" autoComplete="current-password" minLength={8} required /></label><button className="primary">{loginType === "representative" ? "Open admin dashboard" : "Sign in"}</button>{notice && <p className="error">{notice}</p>}</form></section></main>;
+  if (!user && !showLogin) return <main className="welcome-shell"><section className="welcome-card"><p className="eyebrow">Y3 IT Class A</p><h1>Hello, class.</h1><p className="muted">Welcome to our class directory.</p><div className="welcome-grid">{welcomeCards.map((card) => <article className="welcome-person" key={card.regNumber}><img src={card.image} alt="" /><strong>{card.name}</strong></article>)}</div><button className="primary welcome-button" onClick={() => setShowLogin(true)}>Continue to sign in</button></section></main>;
+  if (!user) return <main className="login-shell"><section className="login-card"><button type="button" className="back-link" onClick={() => { setShowLogin(false); setNotice(""); }}>← Class welcome</button><div className="brand">CM<span>+</span></div><p className="eyebrow">Y3 IT Class A</p><h1>{loginType === "representative" ? "Representative sign in" : "Member sign in"}</h1><p className="muted">{loginType === "representative" ? "Secure access for CP and CEPINE." : "View the class directory with your registration number."}</p><div className="login-switch" role="tablist"><button type="button" className={loginType === "member" ? "selected" : ""} onClick={() => { setLoginType("member"); setNotice(""); }}>Members</button><button type="button" className={loginType === "representative" ? "selected" : ""} onClick={() => { setLoginType("representative"); setNotice(""); }}>CP / CEPINE</button></div><form onSubmit={login} className="stack"><label>{loginType === "representative" ? "Phone number" : "Registration number"}<input name="identifier" type={loginType === "representative" ? "tel" : "text"} inputMode={loginType === "representative" ? "tel" : "text"} autoComplete="username" placeholder={loginType === "representative" ? "0786718716" : "e.g. 24RP12420"} required /></label><label>Password<input name="password" type="password" autoComplete="current-password" minLength={8} required /></label><button className="primary">{loginType === "representative" ? "Open admin dashboard" : "Sign in"}</button>{notice && <p className="error">{notice}</p>}</form></section></main>;
 
   const admin = user.role === "CP" || user.role === "CEPINE";
   return <main className="app-shell">
