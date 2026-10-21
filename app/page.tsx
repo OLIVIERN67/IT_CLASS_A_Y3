@@ -34,10 +34,19 @@ export default function Home() {
     event.preventDefault();
     const formData = Object.fromEntries(new FormData(event.currentTarget));
     const data = { ...formData, loginType };
-    const response = await fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
-    const result = await response.json();
-    if (!response.ok) return setNotice(result.error);
-    setUser(result.user); setNotice(""); load();
+    try {
+      const response = await fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+      let result: { error?: string; user?: SessionUser };
+      try {
+        result = await response.json();
+      } catch {
+        return setNotice("The sign-in service returned an invalid response. Try again.");
+      }
+      if (!response.ok || !result.user) return setNotice(result.error || "Unable to sign in. Try again.");
+      setUser(result.user); setNotice(""); load();
+    } catch {
+      setNotice("Unable to reach the sign-in service. Check your connection and try again.");
+    }
   }
   async function save(event: FormEvent) {
     event.preventDefault();
